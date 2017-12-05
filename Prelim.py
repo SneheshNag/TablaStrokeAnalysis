@@ -97,14 +97,6 @@ def band_decay(audio, rate, band_no):
     #bpf = estd.BandPass(bandwidth=100, cutoffFrequency=80.5)
     #x = bpf(audio)
     popt1 = exp_env(audio, 0.05*rate)
-    #popt1=popt1.tolist()
-    #popt1.append(80.5)
-    #x0_en = pow(max(x),2)
-    #for indx in range(int(0.6*rate),len(x)):
-    #  if pow(x[indx],2) < x0_en*0.3:
-    #    #print indx
-    #    popt1.append(indx/rate)
-    #    break
     return np.array(popt1)
   
 def sustain_durn(audio,rate):
