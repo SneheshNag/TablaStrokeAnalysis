@@ -18,11 +18,7 @@ def func_centr(audio,rate):
 def band_decay(audio, rate, band_no):
   def freq(audio, rate):
     audio=audio[int(0.001*rate):int(1.0*rate)]
-    #p,pc=estd.PitchMelodia()(audio)
-    #b=p>50
-    #ff=(p[np.where(pc==pc.max())]).mean()
     ff,con=PitchYin()(audio)
-    print ff
     return ff
     
   def exp_env(audio, step):
@@ -71,7 +67,6 @@ def band_decay(audio, rate, band_no):
     en_mod = np.array(audio1-yy, dtype='float32')
     if len(en_mod)%2>0:
       en_mod=en_mod[:-1]
-    print 44100./len(en_mod)
     spectrum=estd.Spectrum()(en_mod)
     plt.plot(spectrum)
     plt.show()
@@ -102,7 +97,7 @@ def sustain_durn(audio,rate):
   stop=(np.where(st_en < st_en.max()*0.01)[0])[0]
   return stop-start
 
-path = '/media/hitesh/Work/Rohit_RA_2017/frsm_sets'
+path = '/Users/sneheshnag/tablaratings/'
 stroke = sys.argv[1]
 category=['Good', 'Bad']
 
@@ -122,7 +117,6 @@ for seti in sets:
     files_categ = os.listdir(path+'/'+seti+'/'+stroke+'/'+categ) 
     for wave in files_categ:
       fileName = path+'/'+seti+'/'+stroke+'/'+categ+'/'+wave
-      #print fileName
       audio=estd.EqloudLoader(filename=fileName)()
       dict_temp={}
       dict_temp['Filename']=wave
@@ -131,9 +125,7 @@ for seti in sets:
       dict_temp['Decay Rate'] = band_decay(audio, rate, 1)[0]
       dict_temp['Sustain'] = sustain_durn(audio, rate)
       data_df=data_df.append(dict_temp, ignore_index=True)
-
-print data_df
-
+      
 plt.title(stroke)
 sns.swarmplot(x="Set", y="Centroid1", hue="Category", data=data_df, palette="Set2", dodge=True)
 sns.boxplot(x="Set", y="Centroid1", hue="Category", data=data_df, palette="Set2", dodge=True, boxprops={'facecolor':'None'})
