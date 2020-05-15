@@ -32,18 +32,14 @@ def band_decay(audio, rate, band_no):
     audio1=audio
     audio = audio[np.argmax(audio):]
     step = int(step)
-    #plt.plot(np.arange(0, len(audio), 4), np.abs(audio[::4]))
     audio = np.abs(audio)
     envelope = []
     env_x = []
     for i in range(0, len(audio), step):
         env_x += [i+np.argmax(audio[i:i+step])]
         envelope += [np.max(audio[i:i+step])]
-    #print env_x, envelope
-    #plt.plot(env_x, envelope)
     env_x=np.array(env_x)
     envelope = np.array(envelope)
-    #print env_x
     try:
         popt, pcov = curve_fit(func, env_x, envelope, p0=(1, 1e-3))
     except RuntimeError:
@@ -51,17 +47,13 @@ def band_decay(audio, rate, band_no):
         pcov = []
     xx = np.arange(0, len(audio), 1)
     yy = func(xx, *popt)
-    #yy=pow(yy,2)
     xx=xx+max_pos
     xx=np.append(np.arange(0,max_pos),xx)
     yy=np.append(np.zeros(max_pos),yy)
     plt.plot(xx, yy)
     plt.plot(xx,audio1, color='green')
     start = env_x[np.where(envelope==envelope.max())[0]]
-    #nf = audio[0:10000].mean()
     nf1 = envelope[0:5].mean()
-    #print nf1
-    #print nf1/(0.01*envelope.max())
     locs = np.where(envelope<0.1*envelope.max())[0]
     if len(locs)<1:
       stop1 = env_x[-1]
@@ -72,7 +64,6 @@ def band_decay(audio, rate, band_no):
       stop2 = env_x[-1]
     else:
       stop2 = env_x[locs[np.where(locs > np.where(envelope==envelope.max())[0])][0]]
-    #print start, stop
     plt.xlabel('Samples')
     plt.ylabel('Absolute Amplitude')
     plt.axis([0,140000, 0, 0.20])
@@ -93,9 +84,6 @@ def band_decay(audio, rate, band_no):
     popt1.append(freq(audio,rate))
     return np.array(popt1)
   else:
-    #bpf = estd.BandPass(bandwidth=100, cutoffFrequency=(band_no*2*freq(audio,rate)))
-    #bpf = estd.BandPass(bandwidth=100, cutoffFrequency=80.5)
-    #x = bpf(audio)
     popt1 = exp_env(audio, 0.05*rate)
     return np.array(popt1)
   
@@ -106,23 +94,18 @@ def sustain_durn(audio,rate):
   for frame in FrameGenerator(audio, frameSize=1024, hopSize=512, startFromZero=True):
     frame_win=Windowing(type='hamming')(frame)
     st_en.append(pow(frame_win,2).sum())
-    #st_en.append((20*math.log(pow(frame_win,2).sum())/ math.log(10)))
   st_en=np.array(st_en)
   x = np.arange(len(st_en))*512
-  #plt.plot(np.arange(len(audio)), audio)
   plt.plot(x,st_en)
   plt.show()
   start=np.where(st_en==st_en.max())[0]
   stop=(np.where(st_en < st_en.max()*0.01)[0])[0]
-  #print start, stop
   return stop-start
 
 path = '/media/hitesh/Work/Rohit_RA_2017/frsm_sets'
 stroke = sys.argv[1]
-#feature = sys.argv[2]
-#category = sys.argv[2]
 category=['Good', 'Bad']
-#feature='Centroid'
+
 
 rate=44100.
 
@@ -145,14 +128,8 @@ for seti in sets:
       dict_temp['Filename']=wave
       dict_temp['Set']=seti
       dict_temp['Category']=categ
-      #dict_temp['Impulse'] = band_decay(audio, rate, 0)[0]
       dict_temp['Decay Rate'] = band_decay(audio, rate, 1)[0]
-      #dict_temp['F0'] = band_decay(audio, rate, 1)[2]
       dict_temp['Sustain'] = sustain_durn(audio, rate)
-      #dict_temp['Sustain Duration'] = band_decay(audio, rate, 1)[3]
-      #dict_temp['Centroid1'] = (estd.Centroid(range=(len(audio)/2)+1)(Spectrum()(audio[:2*(len(audio)/2)])))*rate/(2*(len(audio)/2))
-      #dict_temp['Centroid2'] = func_centr(audio,rate)
-      #dict_temp['Centroid3'] = estd.SpectralCentroidTime()(audio)
       data_df=data_df.append(dict_temp, ignore_index=True)
 
 print data_df
